@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MD Hawk / Pabbi — Distribution Strategy Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue-dark: #0C2D5C;
+    --blue-mid: #1A4F9C;
+    --blue-accent: #1E6FD9;
+    --blue-light: #E8F1FB;
+    --gold: #C9922A;
+    --gold-light: #FDF3E0;
+    --text: #1A1A2E;
+    --muted: #5A5F7A;
+    --border: #D8DDE8;
+    --surface: #F7F9FC;
+    --white: #FFFFFF;
+    --green: #1B6E42;
+    --green-light: #E6F4ED;
+    --red: #A32020;
+    --red-light: #FAEAEA;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    background: var(--white);
+    line-height: 1.6;
+  }
+
+  /* HERO */
+  .hero {
+    background: var(--blue-dark);
+    color: white;
+    padding: 80px 40px 60px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 320px; height: 320px;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 20%;
+    width: 200px; height: 200px;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 50%;
+  }
+  .hero-inner { max-width: 860px; margin: 0 auto; position: relative; z-index: 1; }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.85);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 5vw, 52px);
+    line-height: 1.15;
+    color: white;
+    margin-bottom: 16px;
+  }
+  .hero-sub {
+    font-size: 17px;
+    color: rgba(255,255,255,0.65);
+    max-width: 560px;
+    margin-bottom: 40px;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .meta-item { font-size: 13px; color: rgba(255,255,255,0.55); }
+  .meta-item strong { display: block; font-size: 15px; color: rgba(255,255,255,0.9); font-weight: 500; margin-bottom: 2px; }
+
+  /* SECTION */
+  section { padding: 60px 40px; }
+  section:nth-child(even) { background: var(--surface); }
+  .section-inner { max-width: 860px; margin: 0 auto; }
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--blue-accent);
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(24px, 3.5vw, 34px);
+    color: var(--blue-dark);
+    margin-bottom: 14px;
+    line-height: 1.2;
+  }
+  .section-body {
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 640px;
+    line-height: 1.8;
+    margin-bottom: 36px;
+  }
+
+  /* KPI CARDS */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .kpi-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .kpi-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .kpi-value { font-size: 28px; font-weight: 600; color: var(--blue-dark); line-height: 1; margin-bottom: 4px; }
+  .kpi-sub { font-size: 12px; color: var(--muted); }
+
+  /* TABLE */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .data-table thead tr { background: var(--blue-dark); color: white; }
+  .data-table th { padding: 12px 16px; text-align: left; font-weight: 500; font-size: 12px; letter-spacing: 0.5px; }
+  .data-table td { padding: 11px 16px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .data-table tr:last-child td { border-bottom: none; font-weight: 600; background: var(--blue-light); color: var(--blue-dark); }
+  .data-table tr.highlight td { background: rgba(30,111,217,0.05); }
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .badge-blue { background: var(--blue-light); color: var(--blue-mid); }
+  .badge-gold { background: var(--gold-light); color: var(--gold); }
+
+  /* BRAND BAR CHARTS */
+  .town-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .town-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .town-name { font-weight: 600; font-size: 14px; color: var(--blue-dark); margin-bottom: 14px; }
+  .brand-row { margin-bottom: 8px; }
+  .brand-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .bar-track { background: var(--border); border-radius: 4px; height: 7px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .bar-dostea { background: #1A4F9C; }
+  .bar-nurpur { background: #1B6E42; }
+  .bar-other { background: #C9922A; }
+
+  /* SCENARIO */
+  .scenario-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 32px; }
+  @media(max-width: 600px) { .scenario-grid { grid-template-columns: 1fr; } }
+  .scenario-card {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .scenario-header { padding: 16px 20px; font-weight: 600; font-size: 14px; }
+  .scenario-header.keep { background: var(--blue-dark); color: white; }
+  .scenario-header.switch { background: var(--green); color: white; }
+  .scenario-body { padding: 16px 20px; font-size: 13px; color: var(--muted); background: var(--white); }
+  .pro-item, .con-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 8px; font-size: 13px; }
+  .pro-item::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .con-item::before { content: '×'; color: var(--red); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+
+  /* STOCK DAYS */
+  .stock-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
+  .stock-card {
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    background: var(--white);
+  }
+  .stock-card.critical { border-color: #f0b3b3; background: var(--red-light); }
+  .stock-card.ok { border-color: #a3ceb9; background: var(--green-light); }
+  .stock-town { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+  .stock-days { font-size: 36px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .stock-days.low { color: var(--red); }
+  .stock-days.high { color: var(--green); }
+  .stock-label { font-size: 11px; color: var(--muted); }
+
+  /* ISSUES */
+  .issues-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+  .issue-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--blue-accent);
+    border-radius: 0 10px 10px 0;
+    padding: 14px 18px;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .issue-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  /* RECOMMENDATION */
+  .recommendation-box {
+    background: var(--blue-dark);
+    color: white;
+    border-radius: 16px;
+    padding: 36px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .recommendation-box::after {
+    content: '"';
+    font-family: 'DM Serif Display', serif;
+    font-size: 200px;
+    color: rgba(255,255,255,0.05);
+    position: absolute;
+    top: -20px; right: 20px;
+    line-height: 1;
+  }
+  .rec-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 12px; }
+  .rec-text { font-family: 'DM Serif Display', serif; font-size: clamp(18px, 2.5vw, 26px); line-height: 1.5; color: white; position: relative; z-index: 1; }
+
+  /* FOOTER */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 32px 40px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  footer strong { color: var(--blue-dark); }
+
+  /* DIVIDER */
+  .divider { width: 48px; height: 3px; background: var(--blue-accent); border-radius: 2px; margin-bottom: 28px; }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <span class="hero-tag">Distribution Strategy · Junior Analyst Portfolio</span>
+    <h1>Evaluation of Master Distributor<br>MD Hawk / Pabbi</h1>
+    <p class="hero-sub">A data-driven analysis assessing whether direct distribution of the top 4 KPK towns is operationally viable and financially superior to the existing MD setup.</p>
+    <div class="hero-meta">
+      <div class="meta-item"><strong>30 Towns</strong>Under MD Coverage</div>
+      <div class="meta-item"><strong>PKR 132M</strong>Monthly Sales Volume</div>
+      <div class="meta-item"><strong>4 Towns</strong>Evaluated for Direct Dist.</div>
+      <div class="meta-item"><strong>PKR 2.4M</strong>Freight Cost Identified</div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTEXT -->
+<section>
+  <div class="section-inner">
+    <p class="section-label">Background</p>
+    <h2 class="section-title">Context & Objective</h2>
+    <div class="divider"></div>
+    <p class="section-body">
+      Currently, approximately 30 towns in the Peshawar region are served through a Master Distributor (MD) setup. The MD receives stock from Islamabad, supplies multiple sub-distributors, and handles order consolidation, inventory visibility, and market responsiveness — charging a 3.75% margin plus actual freight costs.
+    </p>
+    <p class="section-body">
+      This analysis evaluates whether the company should <strong>directly serve</strong> MD Pabbi's top 4 towns — Mardan, Kohat, Nowshera, and Bannu — by comparing the MD margin cost against direct distribution (DD) logistics overhead and weighing the exit risks involved.
+    </p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">MD Margin Charged</div>
+        <div class="kpi-value">3.75%</div>
+        <div class="kpi-sub">+ actual freight per route</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Orders per Month</div>
+        <div class="kpi-value">~12.8</div>
+        <div class="kpi-sub">Avg invoice: PKR 16.2M</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Liters Sold Range</div>
+        <div class="kpi-value">34K–74K</div>
+        <div class="kpi-sub">Liters per month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Top 4 Towns Share</div>
+        <div class="kpi-value">49%</div>
+        <div class="kpi-sub">Of MD Pabbi secondary sales</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOWN BREAKDOWN -->
+<section>
+  <div class="section-inner">
+    <p class="section-label">Sales Data</p>
+    <h2 class="section-title">Town-Level Performance Breakdown</h2>
+    <div class="divider"></div>
+    <p class="section-body">The top 4 towns collectively represent 49% of secondary sales and 38% of monthly deliveries, making them strategically significant targets for direct distribution.</p>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Town</th>
+          <th>Monthly Value</th>
+          <th>Monthly Supplies</th>
+          <th>Litres/Day</th>
+          <th># SDs</th>
+          <th>MD Share</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight">
+          <td>1</td>
+          <td><strong>Mardan</strong> <span class="badge badge-blue">Top 4</span></td>
+          <td>PKR 22M</td>
+          <td>14</td>
+          <td>2,478</td>
+          <td>1</td>
+          <td><strong>17%</strong></td>
+        </tr>
+        <tr class="highlight">
+          <td>2</td>
+          <td><strong>Kohat</strong> <span class="badge badge-blue">Top 4</span></td>
+          <td>PKR 16M</td>
+          <td>14</td>
+          <td>1,883</td>
+          <td>1</td>
+          <td><strong>13%</strong></td>
+        </tr>
+        <tr class="highlight">
+          <td>3</td>
+          <td><strong>Nowshera</strong> <span class="badge badge-blue">Top 4</span></td>
+          <td>PKR 16M</td>
+          <td>13</td>
+          <td>1,631</td>
+          <td>1</td>
+          <td><strong>12%</strong></td>
+        </tr>
+        <tr class="highlight">
+          <td>4</td>
+          <td><strong>Bannu</strong> <span class="badge badge-blue">Top 4</span></td>
+          <td>PKR 10M</td>
+          <td>10</td>
+          <td>1,138</td>
+          <td>1</td>
+          <td><strong>8%</strong></td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td>Shabqadar</td>
+          <td>PKR 8M</td>
+          <td>8</td>
+          <td>1,037</td>
+          <td>1</td>
+          <td>6%</td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td>Buner</td>
+          <td>PKR 7M</td>
+          <td>4</td>
+          <td>793</td>
+          <td>1</td>
+          <td>5%</td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td>Mingora</td>
+          <td>PKR 6M</td>
+          <td>6</td>
+          <td>804</td>
+          <td>1</td>
+          <td>5%</td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td>Charsadda</td>
+          <td>PKR 6M</td>
+          <td>8</td>
+          <td>691</td>
+          <td>1</td>
+          <td>4%</td>
+        </tr>
+        <tr>
+          <td>—</td>
+          <td>Others (22 towns)</td>
+          <td>PKR 32M</td>
+          <td>84</td>
+          <td>11,248</td>
+          <td>22</td>
+          <td>25%</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>Total</td>
+          <td>PKR 132M</td>
+          <td>168</td>
+          <td>22,497</td>
+          <td>30</td>
+          <td>100%</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- BRAND CONTRIBUTION -->
+<section>
+  <div class="section-inner">
+    <p class="section-label">Product Mix</p>
+    <h2 class="section-title">Brand Contribution by Town</h2>
+    <div class="divider"></div>
+    <p class="section-body">Brand mix varies significantly across towns. Dostea and Nurpur dominate most towns, but the balance shifts — Mardan is Dostea-heavy (57%), while Kohat and Bannu are heavily Nurpur-led (74% and 77% respectively).</p>
+
+    <div class="town-grid">
+      <div class="town-card">
+        <div class="town-name">Mardan</div>
+        <div class="brand-row">
+          <div class="brand-label"><span>Dostea</span><span>57%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-dostea" style="width:57%"></div></div>
+        </div>
+        <div class="brand-row">
+          <div class="brand-label"><span>Nurpur</span><span>34%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-nurpur" style="width:34%"></div></div>
+        </div>
+        <div class="brand-row">
+          <div class="brand-label"><span>Others</span><span>9%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-other" style="width:9%"></div></div>
+        </div>
+      </div>
+      <div class="town-card">
+        <div class="town-name">Kohat</div>
+        <div class="brand-row">
+          <div class="brand-label"><span>Nurpur</span><span>74%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-nurpur" style="width:74%"></div></div>
+        </div>
+        <div class="brand-row">
+          <div class="brand-label"><span>Dostea</span><span>20%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-dostea" style="width:20%"></div></div>
+        </div>
+        <div class="brand-row">
+          <div class="brand-label"><span>Others</span><span>6%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-other" style="width:6%"></div></div>
+        </div>
+      </div>
+      <div class="town-card">
+        <div class="town-name">Nowshera</div>
+        <div class="brand-row">
+          <div class="brand-label"><span>Nurpur</span><span>60%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-nurpur" style="width:60%"></div></div>
+        </div>
+        <div class="brand-row">
+          <div class="brand-label"><span>Dostea</span><span>27%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-dostea" style="width:27%"></div></div>
+        </div>
+        <div class="brand-row">
+          <div class="brand-label"><span>Others</span><span>13%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-other" style="width:13%"></div></div>
+        </div>
+      </div>
+      <div class="town-card">
+        <div class="town-name">Bannu</div>
+        <div class="brand-row">
+          <div class="brand-label"><span>Nurpur</span><span>77%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-nurpur" style="width:77%"></div></div>
+        </div>
+        <div class="brand-row">
+          <div class="brand-label"><span>Dostea</span><span>19%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-dostea" style="width:19%"></div></div>
+        </div>
+        <div class="brand-row">
+          <div class="brand-label"><span>Others</span><span>4%</span></div>
+          <div class="bar-track"><div class="bar-fill bar-other" style="width:4%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STOCK DAYS -->
+<section>
+  <div class="section-inner">
+    <p class="section-label">Inventory Health</p>
+    <h2 class="section-title">Stock Days — Current Position</h2>
+    <div class="divider"></div>
+    <p class="section-body">A critical inventory imbalance was identified: Mardan is severely understocked at just 1.6 days of cover, while Bannu holds nearly 8 days. Sub-distributors transitioning to direct distribution would need to increase stock depth, investment capacity, and warehousing to sustain operations.</p>
+
+    <div class="stock-grid">
+      <div class="stock-card critical">
+        <div class="stock-town">Mardan</div>
+        <div class="stock-days low">1.6</div>
+        <div class="stock-label">days stock cover ⚠ Understocked</div>
+      </div>
+      <div class="stock-card">
+        <div class="stock-town">Kohat</div>
+        <div class="stock-days" style="color:var(--blue-mid)">6.6</div>
+        <div class="stock-label">days stock cover</div>
+      </div>
+      <div class="stock-card">
+        <div class="stock-town">Nowshera</div>
+        <div class="stock-days" style="color:var(--blue-mid)">5.3</div>
+        <div class="stock-label">days stock cover</div>
+      </div>
+      <div class="stock-card ok">
+        <div class="stock-town">Bannu</div>
+        <div class="stock-days high">7.9</div>
+        <div class="stock-label">days stock cover — Overstocked</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCENARIO ANALYSIS -->
+<section>
+  <div class="section-inner">
+    <p class="section-label">Strategic Options</p>
+    <h2 class="section-title">Scenario Analysis: MD vs. Direct Distribution</h2>
+    <div class="divider"></div>
+    <p class="section-body">Two paths were evaluated. The evaluation criteria weighs MD margin cost versus DD logistics and overhead, while also accounting for MD exit risks, service continuity for smaller adjacent towns, and retailer credit exposure.</p>
+
+    <div class="scenario-grid">
+      <div class="scenario-card">
+        <div class="scenario-header keep">Option 1 — Keep MD Setup</div>
+        <div class="scenario-body">
+          <div class="pro-item">Lower operational complexity</div>
+          <div class="pro-item">Existing distributor relationships</div>
+          <div class="pro-item">Flexible replenishment & credit to SDs</div>
+          <div class="pro-item">Covers small adjacent towns easily</div>
+          <div style="border-top:1px solid var(--border); margin: 12px 0;"></div>
+          <div class="con-item">3.75% MD margin ongoing cost</div>
+          <div class="con-item">Limited pricing & compliance control</div>
+          <div class="con-item">Uneven inventory (1.6 to 7.9 days)</div>
+        </div>
+      </div>
+      <div class="scenario-card">
+        <div class="scenario-header switch">Option 2 — Switch to Direct Distribution</div>
+        <div class="scenario-body">
+          <div class="pro-item">Eliminate 3.75% MD margin</div>
+          <div class="pro-item">Full pricing & execution control</div>
+          <div class="pro-item">Better inventory visibility</div>
+          <div class="pro-item">Potential long-term cost savings</div>
+          <div style="border-top:1px solid var(--border); margin: 12px 0;"></div>
+          <div class="con-item">Higher operational complexity</div>
+          <div class="con-item">~50% reduction in MD earnings → exit risk</div>
+          <div class="con-item">SD must increase stock depth + warehousing</div>
+        </div>
+      </div>
+    </div>
+
+    <ul class="issues-list">
+      <li class="issue-item"><span class="issue-icon">📊</span><div><strong>Stock Imbalance:</strong> Mardan critically understocked at 1.6 days of cover; Bannu overstocked at 7.9 days — signals supply planning gaps.</div></li>
+      <li class="issue-item"><span class="issue-icon">🚛</span><div><strong>Freight Concentration:</strong> The top 4 towns account for PKR 2.4M in freight costs and 38% of monthly deliveries despite being only 4 of 30 towns.</div></li>
+      <li class="issue-item"><span class="issue-icon">⚠️</span><div><strong>MD Business Viability Risk:</strong> Removing top 4 towns reduces MD earnings by approximately 50%, potentially destabilising service to the remaining 26 towns.</div></li>
+    </ul>
+  </div>
+</section>
+
+<!-- RECOMMENDATION -->
+<section>
+  <div class="section-inner">
+    <p class="section-label">Conclusion</p>
+    <h2 class="section-title">Key Findings & Recommendation</h2>
+    <div class="divider"></div>
+    <p class="section-body">The top 4 towns represent significant financial scale (PKR 64M of 132M) and are logistically clustered, making them viable DD candidates. However, the transition requires careful sequencing to manage MD exit risk and SD readiness.</p>
+    <div class="recommendation-box">
+      <div class="rec-label">Analyst Recommendation</div>
+      <div class="rec-text">A phased transition to direct distribution for Mardan and Nowshera is recommended as the first stage, given their volume and logistical proximity. Kohat and Bannu should follow once sub-distributor stock capacity and warehousing requirements are confirmed. The MD should be retained for the remaining 26 towns to avoid service disruption.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Analysis conducted by <strong>[Your Name]</strong> · Junior Data Analyst · Distribution Strategy Portfolio</p>
+  <p style="margin-top:6px">Data covers MD Hawk / Pabbi region — Peshawar, KPK, Pakistan</p>
+</footer>
+
+</body>
+</html>
